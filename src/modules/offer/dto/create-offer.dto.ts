@@ -20,5 +20,4 @@ export default class CreateOfferDto {
   public host!: User;
   public comments!: number;
   public location!: Location;
-  public userId!: string;
 }
