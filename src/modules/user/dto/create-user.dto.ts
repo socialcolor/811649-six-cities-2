@@ -3,5 +3,5 @@ export default class CreateUserDto {
   public email!: string;
   public avatarUrl!: string;
   public password!: string;
-  public isPro!: boolean;
+  public isPro!: string;
 }

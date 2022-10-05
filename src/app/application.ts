@@ -3,7 +3,7 @@ import { inject, injectable } from 'inversify';
 import { LoggerInterface } from '../common/logger/logger.interface.js';
 import { ConfigInterface } from '../common/config/config.interface.js';
 import { Component } from '../types/component.types.js';
-import { DataBaseInterFace } from '../common/database-client/database.interface.js';
+import { DatabaseInterface } from '../common/database-client/database.interface.js';
 import {getURI} from '../utils/db.js';
 
 @injectable()
@@ -11,7 +11,7 @@ export default class Application {
   constructor(
     @inject(Component.LoggerInterface) private logger: LoggerInterface,
     @inject(Component.ConfigInterface) private config: ConfigInterface,
-    @inject(Component.DatabaseInterface) private databaseClient: DataBaseInterFace
+    @inject(Component.DatabaseInterface) private databaseClient: DatabaseInterface
   ) {}
 
   public async init() {
