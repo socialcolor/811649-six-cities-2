@@ -8,7 +8,7 @@ export default class CreateOfferDto {
   public date!: string;
   public city!: string;
   public previewImage!: string;
-  public images!: string;
+  public images!: string[];
   public isPremium!: string;
   public isFavorite!: string;
   public rating!: number;
@@ -16,8 +16,9 @@ export default class CreateOfferDto {
   public bedrooms!: number;
   public maxAdults!: number;
   public price!: number;
-  public goods!: string;
+  public goods!: string[];
   public host!: User;
   public comments!: number;
   public location!: Location;
+  public userId!: string;
 }
