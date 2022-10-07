@@ -1,8 +1,9 @@
+import crypto from 'crypto';
 import { HousingOfType } from '../types/housing-of-type.enum';
 
 export const createOffer = (row: string) => {
   const tokens = row.replace('\n', '').split('\t');
-  const [title, description, date, city, previewImage, images, isPremium, isFavorite, rating, type, bedrooms, maxAdults, price, goods, name, email, avatarUrl, password, isPro, comments, lat, lng] = tokens;
+  const [title, description, date, city, previewImage, images, isPremium, isFavorite, rating, type, bedrooms, maxAdults, price, goods, name, email, avatarUrl, isPro, comments, lat, lng] = tokens;
   return {
     title,
     description,
@@ -22,7 +23,6 @@ export const createOffer = (row: string) => {
       name,
       email,
       avatarUrl,
-      password,
       isPro: isPro,
     },
     comments: Number(comments),
@@ -35,3 +35,8 @@ export const createOffer = (row: string) => {
 
 export const getErrorMessage = (error: unknown): string =>
   error instanceof Error ? error.message : '';
+
+export const createSHA256 = (line: string, salt: string): string => {
+  const shaHasher = crypto.createHmac('sha256', salt);
+  return shaHasher.update(line).digest('hex');
+};
