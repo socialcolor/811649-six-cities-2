@@ -398,7 +398,8 @@ paths:
             application/json:
               schema:
                 type: array
-                $ref: '#/components/schemas/comment'
+                items:
+                  $ref: '#/components/schemas/comment'
         '404':
           description: Объявлене не найденно
           content:
@@ -552,7 +553,7 @@ components:
           type: array
           items:
             type: string
-          example: ['img/1.jpg', 'img/2.jpg', 'img/3.jpg']
+          example: 'img/1.jpg'
         isPremium:
           type: string
           example: 'true'
@@ -566,10 +567,8 @@ components:
           type: integer
           example: 100
         comments:
-          type: array
-          items:
-            type: string
-            example: ['6329c3d6a04ab1061c6dasdsaa', 2349c3d6a04ab1061c6425ea]
+          type: number
+          example: 5
 
     fullOffer:
       type: array
@@ -594,12 +593,12 @@ components:
           city:
             type: string
             example: 'Paris'
-          previewImage:
+          images:
             type: array
             items:
               type: string
             example: ['img/1.jpg', 'img/2.jpg', 'img/3.jpg']
-          images:
+          previewImage:
             type: string
             example: 'img/1.jpg'
           isPremium:
@@ -630,10 +629,8 @@ components:
             example:
               $ref: '#/components/schemas/host'
           comments:
-            type: array
-            items:
               type: string
-              example: ['6329c3d6a04ab1061c6dasdsaa', 2349c3d6a04ab1061c6425ea]
+              example: 5
           location:
             type: object
             example: {latitude: 48.8, longitude: 2.338499}
@@ -670,12 +667,12 @@ components:
         city:
           type: string
           example: 'Paris'
-        previewImage:
+        images:
           type: array
           items:
             type: string
           example: ['img/1.jpg', 'img/2.jpg', 'img/3.jpg']
-        images:
+        previewImage:
           type: string
           example: 'img/1.jpg'
         isPremium:
