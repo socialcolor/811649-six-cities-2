@@ -1,6 +1,5 @@
 import typegoose, { defaultClasses, getModelForClass, Ref } from '@typegoose/typegoose';
 import { HousingOfType } from '../../types/housing-of-type.enum.js';
-// import { User } from '../../types/user.type.js';
 import { UserEntity } from '../user/user.entity.js';
 const { prop, modelOptions } = typegoose;
 
