@@ -6,6 +6,7 @@ import { Component } from '../types/component.types.js';
 import {getURI} from '../utils/db.js';
 import { DatabaseInterface } from '../common/database-client/database.interface.js';
 import { OfferServiceInterface } from '../modules/offer/offer-service.interface.js';
+
 @injectable()
 export default class Application {
   constructor(
@@ -29,7 +30,7 @@ export default class Application {
 
     await this.databaseClient.connect(uri);
 
-    const offer = await this.offerModel.find();
+    const offer = await this.offerModel.findById('63442789cadffc7408b68d80');
     console.log(offer);
 
   }
