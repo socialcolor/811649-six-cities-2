@@ -1,0 +1,747 @@
+openapi: 3.0.2
+info:
+  title: API сервер «6 Городов».
+  description: |-
+    * Список ресурсов и маршрутов сервера 6 Городов».
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+  version: 2.0.0
+tags:
+  - name: users
+    description: Действия с пользователями
+  - name: offers
+    description: Действия с объявлениями
+  - name: Premium
+    description: Действия с премияльными объявлениями
+  - name: Favorite
+    description: Действия с избранными объявлениями
+  - name: comments
+    description: Действия с комментариями
+
+paths:
+  /users:
+    get:
+      tags:
+      - users
+      summary: Проверить статус авторизации пользователя
+      description: Возвращает информацию о статусе авторизации пользователя.
+      parameters:
+        - in: header
+          name: X-Token
+          description: Токен авторизации
+          schema:
+            type: string
+            example: T2xpdmVyLmNvbm5lckBnbWFpbC5jb20=
+          required: true
+      responses:
+        '200':
+          description: Пользователь авторизован
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/user'
+        '401':
+          description: Пользователь не авторизован
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+    post:
+      tags:
+        - users
+      summary: Регистрация пользователя
+      description: Регистрирует нового пользователя. Регистрацию может произвести только неавторизованный пользователь
+      requestBody:
+        description: Информация для создания нового пользователя.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/createUser'
+        required: true
+      responses:
+        '201':
+          description: Пользователь зарегистрирован. Объект пользователя.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/user'
+        '400':
+          description: Пользователь с таким email уже существует.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Пользователь с таким email уже существует
+
+  /login:
+    post:
+      tags:
+        - users
+      summary: Авторизация
+      description: Авторизация пользователя. Возвращяет token который надо будет подставлять в header X-token
+
+      requestBody:
+        description: Информация для авторизации.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/login'
+        required: true
+
+      responses:
+        '200':
+          description: Пользователь авторизован.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/user'
+        '401':
+          description: Не удалось авторизоваться, проверье логин и пароль.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+
+  /logout:
+    delete:
+      tags:
+        - users
+      summary: Выход пользователя
+      description: Выход пользователя из закрытой части приложения
+      parameters:
+        - in: header
+          name: X-Token
+          description: Токен авторизации
+          schema:
+            type: string
+            example: T2xpdmVyLmNvbm5lckBnbWFpbC5jb20=
+          required: true
+      responses:
+        '200':
+          description: Сеанс завершен
+        '400':
+          description: Ошибка, неверный токен
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+
+  /offers:
+    get:
+      tags:
+      - offers
+      summary: Получения объявлений
+      description: Возвращяет объявления, но не более 60 штук. Если нужно больше, нужно указать количество
+      parameters:
+        - in: query
+          name: amount
+          description: Количество объявлений
+          schema:
+            type: integer
+            example: 100
+      responses:
+        '200':
+          description: Список объявлений
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#components/schemas/offer'
+    post:
+      tags:
+      - offers
+      summary: Создания объвление
+      description: Создание нового объявление
+      parameters:
+        - in: header
+          name: X-Token
+          description: Токен авторизации
+          schema:
+            type: string
+            example: T2xpdmVyLmNvbm5lckBnbWFpbC5jb20=
+          required: true
+      requestBody:
+        description: Объект объявления
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/createOffer'
+        required: true
+      responses:
+        '201':
+          description: Объявление создано.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/offer'
+        '400':
+          description: Ошибка в данных
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        '401':
+          description: Пользователь не авторизован
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+
+  /offers/{id}:
+    get:
+      tags:
+      - offers
+      summary: Детальная информация по объявлению
+      description: Детальная информация по объявлению
+      responses:
+        '200':
+          description: Объект объявления
+          content:
+            application/json:
+              schema:
+                $ref: '#components/schemas/fullOffer'
+        '404':
+          description: Объявлене не найденно
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+    delete:
+      tags:
+      - offers
+      summary: Удаление объявления
+      description: Удаление объявления. Можно удалять только свои объявления.  При удалении предложения комментарии к предложению удаляются автоматически
+      parameters:
+        - in: header
+          name: X-Token
+          description: Токен авторизации
+          schema:
+            type: string
+            example: T2xpdmVyLmNvbm5lckBnbWFpbC5jb20=
+          required: true
+      responses:
+        '200':
+          description: Объявление удаленно
+        '400':
+         description: Ошибка в данных объявления
+         content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/error'
+        '401':
+         description: Вы не авторизованны
+         content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/error'
+        '403':
+          description: Объявлене создано не вами
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        '404':
+          description: Объявлене не найденно
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+    patch:
+      tags:
+        - offers
+      summary: Редактирование объвление
+      description: Редактирования объявление. Передаются все поля объявление. Можно редактировать только свои объявления
+      parameters:
+        - in: header
+          name: X-Token
+          description: Токен авторизации
+          schema:
+            type: string
+            example: T2xpdmVyLmNvbm5lckBnbWFpbC5jb20=
+          required: true
+      requestBody:
+        description: Объект объявления
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/fullOffer'
+        required: true
+      responses:
+        '201':
+          description: Обновленный объект объявления
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/fullOffer'
+        '400':
+           description: Ошибка в данных объявления
+           content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        '401':
+         description: Вы не авторизованны
+         content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/error'
+        '403':
+          description: Объявлене создано не вами
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        '404':
+          description: Объявлене не найденно
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+
+  /offers/premium/{city}:
+    get:
+      tags:
+      - Premium
+      summary: Премиальные предложения для города
+      description: Возвращяет премиальные объявления, но не более 3 штук.
+      responses:
+        '200':
+          description: Список премиальных объявлений. Если пустой массив - премиальные объявления отсутствуют
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#components/schemas/offer'
+        '400':
+          description: Город не найден
+          content:
+            application/json:
+              schema:
+                $ref: '#components/schemas/error'
+
+  /offers/favorite/:
+    get:
+      tags:
+      - Favorite
+      summary: Список избранных объявлений
+      description: Возвращает все объявления, добавленные в избранное. Ресурс доступен только авторизованным клиентам.
+      parameters:
+        - in: header
+          name: X-Token
+          description: Токен авторизации
+          schema:
+            type: string
+            example: T2xpdmVyLmNvbm5lckBnbWFpbC5jb20=
+          required: true
+      responses:
+        '200':
+          description: Список избранных объявлений. Если пустой массив - объявления отсутствуют
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#components/schemas/offer'
+        '401':
+          description: Пользователь не авторизован
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+
+  /offers/favorite/{id}/{status}:
+    get:
+      tags:
+      - Favorite
+      summary: Добавление или удаления из избранного
+      description: Добавляет или удаляет объявления из избранного, может только авторизованный пользователь. {id} - объявление. {status} - действие. Если {status} - 1, добавить в избранное. Если 0 - удалить из избранного.
+      parameters:
+        - in: header
+          name: X-Token
+          description: Токен авторизации
+          schema:
+            type: string
+            example: T2xpdmVyLmNvbm5lckBnbWFpbC5jb20=
+          required: true
+      responses:
+        '200':
+          description: Статус избранного успешно изменен
+        '400':
+          description: Объявление не найденно
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        '401':
+          description: Пользователь не авторизован
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+
+  /comments/{id}:
+    get:
+      tags:
+        - comments
+      summary: Список комментариев
+      description: Список комментариев для определённого предложения. Сервис всегда возвращает список из 50 (или меньше) последних комментариев
+      responses:
+        '200':
+          description: Список комментариев
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/comment'
+        '404':
+          description: Объявлене не найденно
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+    post:
+      tags:
+        - comments
+      summary: Добавления комментария
+      description: Добавления нового комментария для определенного объявления. Добавлять комментарии могут только авторизованные клиенты.
+      parameters:
+        - in: header
+          name: X-Token
+          description: Токен авторизации
+          schema:
+            type: string
+            example: T2xpdmVyLmNvbm5lckBnbWFpbC5jb20=
+          required: true
+      requestBody:
+        description: Объект комментария
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/createComment'
+      responses:
+        '201':
+          description: Комментарий создан
+          content:
+            application/json:
+              schema:
+                type: array
+                $ref: '#/components/schemas/comment'
+        '400':
+           description: Ошибка в данных комментария
+           content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        '401':
+         description: Вы не авторизованны
+         content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/error'
+        '404':
+          description: Объявлене не найденно
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+
+components:
+  schemas:
+    createUser:
+      type: object
+      properties:
+        name:
+          type: string
+          example: Keks
+        email:
+          type: string
+          example: keks@htmlacademy.ru
+        avatarUrl:
+          type: string
+          example: img/avatar/avatar.jpg
+        password:
+          type: string
+          example: 123456
+        isPro:
+          type: string
+          example: 'true'
+
+    user:
+      type: object
+      properties:
+        id:
+          type: string
+          example: 6329c3d6a04ab1061c6425ea
+        name:
+          type: string
+          example: Keks
+        email:
+          type: string
+          example: keks@htmlacademy.ru
+        avatarUrl:
+          type: string
+          example: img/avatar/avatar.jpg
+        isPro:
+          type: boolean
+          example: true
+        token:
+          type: string
+          example: T2xpdmVyLmNvbm5lckBnbWFpbC5jb20
+
+    login:
+      type: object
+      properties:
+        email:
+          type: string
+          example: keks@htmlacademy.ru
+        password:
+          type: string
+          example: a123456
+
+    error:
+      type: object
+      properties:
+        error:
+          type: string
+          example: Текст ошибки
+
+    host:
+      type: object
+      properties:
+        id:
+          type: string
+          example: 6329c3d6a04ab1061c6425ea
+        name:
+          type: string
+          example: Keks
+        email:
+          type: string
+          example: keks@htmlacademy.ru
+        avatarUrl:
+          type: string
+          example: 'img/avatar/avatar.jpg'
+        isPro:
+          type: string
+          example: 'true'
+
+    offer:
+      type: object
+      properties:
+        id:
+          type: string
+          example: 6329c3d6a04ab1061c6dafsa234
+        title:
+          type: string
+          example: 'Penthouse, 4-5 rooms + 5 balconies'
+        type:
+          type: string
+          example: Apartment
+        date:
+          type: string
+          example: '2022-04-06T08:45:40.283Z'
+        city:
+          type: string
+          example: 'Paris'
+        previewImage:
+          type: array
+          items:
+            type: string
+          example: 'img/1.jpg'
+        isPremium:
+          type: string
+          example: 'true'
+        isFavorite:
+          type: boolean
+          example: 'true'
+        rating:
+          type: integer
+          example: 4
+        price:
+          type: integer
+          example: 100
+        comments:
+          type: number
+          example: 5
+
+    fullOffer:
+      type: array
+      items:
+        type: object
+        properties:
+          id:
+            type: string
+            example: 6329c3d6a04ab1061c6dafsa234
+          title:
+            type: string
+            example: 'Penthouse, 4-5 rooms + 5 balconies'
+          description:
+            type: string
+            example: 'Peaceful studio in the most wanted area in town. Quiet house Near of everything. Completely renovated. Lovely neighbourhood, lot of trendy shops, restaurants and bars in a walking distance.'
+          type:
+            type: string
+            example: Apartment
+          date:
+            type: string
+            example: '2022-04-06T08:45:40.283Z'
+          city:
+            type: string
+            example: 'Paris'
+          images:
+            type: array
+            items:
+              type: string
+            example: ['img/1.jpg', 'img/2.jpg', 'img/3.jpg']
+          previewImage:
+            type: string
+            example: 'img/1.jpg'
+          isPremium:
+            type: string
+            example: 'true'
+          isFavorite:
+            type: boolean
+            example: 'true'
+          rating:
+            type: integer
+            example: 4
+          bedrooms:
+            type: integer
+            example: 2
+          maxAdults:
+            type: integer
+            example: 2
+          price:
+            type: integer
+            example: 100
+          goods:
+            type: array
+            items:
+              type: string
+            example: ['Breakfast', 'Air conditioning', 'Laptop friendly workspace', 'Baby seat', 'Washer', 'Towels', 'Fridge']
+          host:
+            type: object
+            example:
+              $ref: '#/components/schemas/host'
+          comments:
+              type: string
+              example: 5
+          location:
+            type: object
+            example: {latitude: 48.8, longitude: 2.338499}
+
+    createOffer:
+      type: object
+      required:
+        - title
+        - date
+        - description
+        - city
+        - previewImage
+        - images
+        - isPremium
+        - isFavorite
+        - rating
+        - type
+        - bedrooms
+        - maxAdults
+        - price
+        - goods
+        - host
+        - location
+      properties:
+        title:
+          type: string
+          example: 'Penthouse, 4-5 rooms + 5 balconies'
+        description:
+          type: string
+          example: 'Peaceful studio in the most wanted area in town. Quiet house Near of everything. Completely renovated. Lovely neighbourhood, lot of trendy shops, restaurants and bars in a walking distance.'
+        date:
+          type: string
+          example: '2022-04-06T08:45:40.283Z'
+        city:
+          type: string
+          example: 'Paris'
+        images:
+          type: array
+          items:
+            type: string
+          example: ['img/1.jpg', 'img/2.jpg', 'img/3.jpg']
+        previewImage:
+          type: string
+          example: 'img/1.jpg'
+        isPremium:
+          type: string
+          example: 'true'
+        isFavorite:
+          type: boolean
+          example: 'true'
+        rating:
+          type: integer
+          example: 4
+        type:
+          type: string
+          example: 'Apartment'
+        bedrooms:
+          type: integer
+          example: 2
+        maxAdults:
+          type: integer
+          example: 2
+        price:
+          type: integer
+          example: 100
+        goods:
+          type: array
+          items:
+            type: string
+          example: ['Breakfast', 'Air conditioning', 'Laptop friendly workspace', 'Baby seat', 'Washer', 'Towels', 'Fridge']
+        host:
+          type: object
+          example:
+            $ref: '#/components/schemas/host'
+        location:
+          type: object
+          example: {latitude: 48.8, longitude: 2.338499}
+
+    comment:
+      type: object
+      properties:
+        id:
+          type: string
+          example: 6329c3d6a04ab1061c6dafsa234
+        comment:
+          type: string
+          example: Good hotel
+        date:
+          type: string
+          example: '2022-04-06T08:45:40.283Z'
+        rate:
+          type: integer
+          example: 5
+        user:
+          type: object
+          example:
+            $ref: '#/components/schemas/host'
+
+    createComment:
+      type: object
+      properties:
+        comment:
+          type: string
+          example: Good hotel
+        date:
+          type: string
+          example: '2022-04-06T08:45:40.283Z'
+        rate:
+          type: integer
+          example: 5
+        user:
+          type: object
+          example:
+            $ref: '#/components/schemas/host'
