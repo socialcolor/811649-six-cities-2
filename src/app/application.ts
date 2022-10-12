@@ -3,7 +3,7 @@ import { inject, injectable } from 'inversify';
 import { LoggerInterface } from '../common/logger/logger.interface.js';
 import { ConfigInterface } from '../common/config/config.interface.js';
 import { Component } from '../types/component.types.js';
-import {getURI} from '../utils/db.js';
+import { getURI } from '../utils/db.js';
 import { DatabaseInterface } from '../common/database-client/database.interface.js';
 import { OfferServiceInterface } from '../modules/offer/offer-service.interface.js';
 
@@ -13,8 +13,8 @@ export default class Application {
     @inject(Component.LoggerInterface) private logger: LoggerInterface,
     @inject(Component.ConfigInterface) private config: ConfigInterface,
     @inject(Component.DatabaseInterface) private databaseClient: DatabaseInterface,
-    @inject(Component.OfferServiceInterface) private offerModel: OfferServiceInterface
-  ) {}
+    @inject(Component.OfferServiceInterface) private offerService: OfferServiceInterface
+  ) { }
 
   public async init() {
     this.logger.info('Application initialization...');
@@ -30,7 +30,7 @@ export default class Application {
 
     await this.databaseClient.connect(uri);
 
-    const offer = await this.offerModel.updateFavorite('6346a99f11a62e2729d5cb2f', false);
+    const offer = await this.offerService.deleteById('6346a99f11a62e2729d5cb2f');
     console.log(offer);
 
   }
