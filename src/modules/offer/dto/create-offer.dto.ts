@@ -9,8 +9,8 @@ export default class CreateOfferDto {
   public city!: string;
   public previewImage!: string;
   public images!: string[];
-  public isPremium!: string;
-  public isFavorite!: string;
+  public isPremium!: boolean;
+  public isFavorite!: boolean;
   public rating!: number;
   public type!: HousingOfType;
   public bedrooms!: number;

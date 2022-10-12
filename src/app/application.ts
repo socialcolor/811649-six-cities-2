@@ -30,7 +30,7 @@ export default class Application {
 
     await this.databaseClient.connect(uri);
 
-    const offer = await this.offerModel.findById('63442789cadffc7408b68d80');
+    const offer = await this.offerModel.updateFavorite('6346a99f11a62e2729d5cb2f', false);
     console.log(offer);
 
   }

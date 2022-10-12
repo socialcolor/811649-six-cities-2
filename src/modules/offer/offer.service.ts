@@ -5,7 +5,7 @@ import { DocumentType, types } from '@typegoose/typegoose';
 import { OfferEntity } from './offer.entity.js';
 import { Component } from '../../types/component.types.js';
 import { LoggerInterface } from '../../common/logger/logger.interface.js';
-import { DEFAULT_OFFER_COUNT } from './offer.constant.js';
+import { DEFAULT_OFFER_COUNT, PREMIUM_OFFER_COUNT } from './offer.constant.js';
 import UpdateOfferDto from './dto/update-offer.dto.js';
 import { SortType } from '../../types/sort-type.enum.js';
 
@@ -65,6 +65,25 @@ export default class OfferService implements OfferServiceInterface {
     return this.offerModel
       .findByIdAndUpdate(offerId, dto, {new: true})
       .populate('host')
+      .exec();
+  }
+
+  public async findPremium(): Promise<DocumentType<OfferEntity>[]> {
+    return this.offerModel
+      .find({isPremium: true})
+      .sort({createdAt: SortType.Down})
+      .limit(PREMIUM_OFFER_COUNT);
+  }
+
+  public async findFavorite(): Promise<DocumentType<OfferEntity>[]> {
+    return this.offerModel
+      .find({isFavorite: true})
+      .sort({createdAt: SortType.Down});
+  }
+
+  public async updateFavorite(offerId: string, status: boolean): Promise<DocumentType<OfferEntity> | null> {
+    return this.offerModel
+      .findByIdAndUpdate(offerId, {isFavorite: status}, {new: true})
       .exec();
   }
 }
