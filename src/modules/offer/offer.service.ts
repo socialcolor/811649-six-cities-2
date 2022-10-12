@@ -84,6 +84,7 @@ export default class OfferService implements OfferServiceInterface {
   public async updateFavorite(offerId: string, status: boolean): Promise<DocumentType<OfferEntity> | null> {
     return this.offerModel
       .findByIdAndUpdate(offerId, {isFavorite: status}, {new: true})
+      .select({id: 1, title: 1, type: 1, date: 1, city: 1, previewImage: 1, isPremium: 1, isFavorite: 1, rating: 1, price: 1, comments: 1})
       .exec();
   }
 }
