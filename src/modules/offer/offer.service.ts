@@ -8,14 +8,15 @@ import { LoggerInterface } from '../../common/logger/logger.interface.js';
 import { DEFAULT_OFFER_COUNT, PREMIUM_OFFER_COUNT } from './offer.constant.js';
 import UpdateOfferDto from './dto/update-offer.dto.js';
 import { SortType } from '../../types/sort-type.enum.js';
-import { CommentServiceInterface } from '../comment/comment-service.interface.js';
+import { CommentEntity } from '../comment/comment.entity.js';
+// import { CommentServiceInterface } from '../comment/comment-service.interface.js';
 
 @injectable()
 export default class OfferService implements OfferServiceInterface {
   constructor(
     @inject(Component.LoggerInterface) private readonly logger: LoggerInterface,
     @inject(Component.OfferModel) private readonly offerModel: types.ModelType<OfferEntity>,
-    @inject(Component.CommentServiceInterface) private commentModel: CommentServiceInterface,
+    @inject(Component.CommentModel) private readonly commentModel: types.ModelType<CommentEntity>,
   ) {}
 
   public async find(count: number = DEFAULT_OFFER_COUNT): Promise<DocumentType<OfferEntity>[]> {
@@ -58,7 +59,7 @@ export default class OfferService implements OfferServiceInterface {
   }
 
   public async deleteById(offerId: string): Promise<DocumentType<OfferEntity> | null> {
-    this.commentModel.deleteByOfferId(offerId);
+    await this.commentModel.deleteMany({offerId: offerId}).exec();
     return this.offerModel
       .findByIdAndDelete(offerId)
       .exec();
