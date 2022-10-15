@@ -1,6 +1,6 @@
-import {HousingOfType} from '../../../types/housing-of-type.enum';
-import {User} from '../../../types/user.type';
-import {Location} from '../../../types/location.type';
+import {HousingOfType} from '../../../types/housing-of-type.enum.js';
+import {User} from '../../../types/user.type.js';
+import {Location} from '../../../types/location.type.js';
 
 export default class CreateOfferDto {
   public title!: string;
@@ -9,8 +9,8 @@ export default class CreateOfferDto {
   public city!: string;
   public previewImage!: string;
   public images!: string[];
-  public isPremium!: string;
-  public isFavorite!: string;
+  public isPremium!: boolean;
+  public isFavorite!: boolean;
   public rating!: number;
   public type!: HousingOfType;
   public bedrooms!: number;

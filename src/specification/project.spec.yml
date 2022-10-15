@@ -371,7 +371,11 @@ paths:
           required: true
       responses:
         '200':
-          description: Статус избранного успешно изменен
+          description: Возвращяет измененное объявление 
+          content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/offer'
         '400':
           description: Объявление не найденно
           content:

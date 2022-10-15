@@ -1,6 +1,6 @@
-import typegoose, { defaultClasses, getModelForClass } from '@typegoose/typegoose';
+import typegoose, { defaultClasses, getModelForClass, Ref } from '@typegoose/typegoose';
 import { HousingOfType } from '../../types/housing-of-type.enum.js';
-import { User } from '../../types/user.type.js';
+import { UserEntity } from '../user/user.entity.js';
 const { prop, modelOptions } = typegoose;
 
 export interface OfferEntity extends defaultClasses.Base { }
@@ -8,6 +8,9 @@ export interface OfferEntity extends defaultClasses.Base { }
 @modelOptions({
   schemaOptions: {
     collection: 'offers'
+  },
+  options: {
+    allowMixed: 0,
   }
 })
 export class OfferEntity extends defaultClasses.TimeStamps {
@@ -30,10 +33,10 @@ export class OfferEntity extends defaultClasses.TimeStamps {
   public images!: string[];
 
   @prop()
-  public isPremium!: string;
+  public isPremium!: boolean;
 
   @prop()
-  public isFavorite!: string;
+  public isFavorite!: boolean;
 
   @prop()
   public rating!: number;
@@ -59,9 +62,11 @@ export class OfferEntity extends defaultClasses.TimeStamps {
   public goods!: string[];
 
   @prop({
+    ref: UserEntity,
     required: true,
+    _id: false,
   })
-  public host!: User;
+  public host!: Ref<UserEntity>;
 
   @prop()
   public comments!: number;
