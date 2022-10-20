@@ -77,7 +77,7 @@ paths:
                     type: string
                     example: Пользователь с таким email уже существует
 
-  /login:
+  /users/login:
     post:
       tags:
         - users
@@ -106,7 +106,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/error'
 
-  /logout:
+  /users/logout:
     delete:
       tags:
         - users
@@ -371,7 +371,7 @@ paths:
           required: true
       responses:
         '200':
-          description: Возвращяет измененное объявление 
+          description: Возвращяет измененное объявление
           content:
               application/json:
                 schema:

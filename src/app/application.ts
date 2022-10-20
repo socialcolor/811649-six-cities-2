@@ -7,6 +7,7 @@ import { getURI } from '../utils/db.js';
 import { DatabaseInterface } from '../common/database-client/database.interface.js';
 import express, { Express } from 'express';
 import {ExceptionFilterInterface} from '../common/errors/exception-filter.interface.js';
+import { ControllerInterface } from '../common/controller/controller.interface.js';
 
 @injectable()
 export default class Application {
@@ -17,13 +18,15 @@ export default class Application {
     @inject(Component.ConfigInterface) private config: ConfigInterface,
     @inject(Component.DatabaseInterface) private databaseClient: DatabaseInterface,
     @inject(Component.ExceptionFilterInterface) private exceptionFilter: ExceptionFilterInterface,
+    @inject(Component.UserController) private userController: ControllerInterface,
+    @inject(Component.OfferController) private offerController: ControllerInterface,
   ) {
     this.expressApp = express();
   }
 
   public initRoutes() {
-    // this.expressApp.use('/users', this.userController.router);
-    //TODO User COntroller
+    this.expressApp.use('/users', this.userController.router);
+    this.expressApp.use('/offers', this.offerController.router);
   }
 
   public initMiddleware() {
@@ -48,5 +51,10 @@ export default class Application {
 
     await this.databaseClient.connect(uri);
 
+    this.initMiddleware();
+    this.initRoutes();
+    this.initExceptionFilters();
+    this.expressApp.listen(this.config.get('PORT'));
+    this.logger.info(`Server started on http://localhost:${this.config.get('PORT')}`);
   }
 }

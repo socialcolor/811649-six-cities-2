@@ -9,7 +9,6 @@ import { DEFAULT_OFFER_COUNT, PREMIUM_OFFER_COUNT } from './offer.constant.js';
 import UpdateOfferDto from './dto/update-offer.dto.js';
 import { SortType } from '../../types/sort-type.enum.js';
 import { CommentEntity } from '../comment/comment.entity.js';
-// import { CommentServiceInterface } from '../comment/comment-service.interface.js';
 
 @injectable()
 export default class OfferService implements OfferServiceInterface {
@@ -21,14 +20,11 @@ export default class OfferService implements OfferServiceInterface {
 
   public async find(count: number = DEFAULT_OFFER_COUNT): Promise<DocumentType<OfferEntity>[]> {
     this.logger.info('Get offer');
-    const offer = this.offerModel
-      .aggregate([
-        {$addFields: { id: {$toString: '$_id'} }},
-        {$limit: count},
-        {$sort: {createdAt: SortType.Down}},
-        {$project: {_id: 0, id: 1, title: 1, type: 1, date: 1, city: 1, previewImage: 1, isPremium: 1, isFavorite: 1, rating: 1, price: 1, comments: 1}}
-      ]);
-    return offer;
+    return await this.offerModel
+      .find()
+      .sort({createdAt: SortType.Down})
+      .limit(count)
+      .exec();
   }
 
   public async create(dto: CreateOfferDto): Promise<DocumentType<OfferEntity>> {
@@ -39,23 +35,10 @@ export default class OfferService implements OfferServiceInterface {
 
   public async findById(offerId: string): Promise<DocumentType<OfferEntity> | null> {
     const offer = await this.offerModel
-      .aggregate([
-        { $match: { $expr : { $eq: [ '$_id' , { $toObjectId: offerId }]}}},
-        {$lookup: {
-          from: 'users',
-          localField: 'host',
-          foreignField: '_id',
-          pipeline: [
-            {$addFields: {id: {$toString: '$_id'}}},
-            {$project: {_id: 0, password: 0, createdAt: 0, updatedAt: 0, __v: 0}}
-          ],
-          as: 'host'
-        }},
-        {$unwind: '$host'},
-        {$addFields: { id: {$toString: '$_id'} }},
-        {$project: {id: 1, title: 1, description: 1, date: 1, city: 1, previewImage: 1, images: 1, isPremium: 1, isFavorite: 1, rating: 1, type: 1, bedrooms: 1, maxAdults: 1, price: 1, goods: 1, host: 1, comments: 1, location: 1}}
-      ]);
-    return offer[0];
+      .findById(offerId)
+      .populate('host')
+      .exec();
+    return offer;
   }
 
   public async deleteById(offerId: string): Promise<DocumentType<OfferEntity> | null> {
@@ -72,9 +55,9 @@ export default class OfferService implements OfferServiceInterface {
       .exec();
   }
 
-  public async findPremium(): Promise<DocumentType<OfferEntity>[]> {
+  public async findPremium(city: string): Promise<DocumentType<OfferEntity>[]> {
     return this.offerModel
-      .find({isPremium: true})
+      .find({city: city, isPremium: true})
       .sort({createdAt: SortType.Down})
       .limit(PREMIUM_OFFER_COUNT);
   }

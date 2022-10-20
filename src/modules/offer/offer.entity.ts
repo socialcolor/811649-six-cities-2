@@ -1,5 +1,6 @@
 import typegoose, { defaultClasses, getModelForClass, Ref } from '@typegoose/typegoose';
 import { HousingOfType } from '../../types/housing-of-type.enum.js';
+import { Location } from '../../types/location.type.js';
 import { UserEntity } from '../user/user.entity.js';
 const { prop, modelOptions } = typegoose;
 
@@ -17,40 +18,41 @@ export class OfferEntity extends defaultClasses.TimeStamps {
   @prop({ trim: true, required: true })
   public title!: string;
 
-  @prop({ trim: true })
+  @prop({ trim: true, required: true })
   public description!: string;
 
-  @prop()
+  @prop({required: true})
   public date!: string;
 
-  @prop()
+  @prop({required: true})
   public city!: string;
 
-  @prop()
+  @prop({required: true})
   public previewImage!: string;
 
-  @prop({images: () => Array})
+  @prop({images: () => Array, required: true})
   public images!: string[];
 
-  @prop()
+  @prop({required: true})
   public isPremium!: boolean;
 
-  @prop()
+  @prop({required: true})
   public isFavorite!: boolean;
 
-  @prop()
+  @prop({required: true})
   public rating!: number;
 
   @prop({
     type: () => String,
     enum: HousingOfType,
+    required: true
   })
   public type!: HousingOfType;
 
-  @prop()
+  @prop({required: true})
   public bedrooms!: number;
 
-  @prop()
+  @prop({required: true})
   public maxAdults!: number;
 
   @prop({ required: true })
@@ -70,6 +72,11 @@ export class OfferEntity extends defaultClasses.TimeStamps {
 
   @prop()
   public comments!: number;
+
+  @prop({
+    required: true,
+  })
+  public location!: Location;
 }
 
 export const OfferModel = getModelForClass(OfferEntity);
