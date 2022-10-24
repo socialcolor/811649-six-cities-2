@@ -13,6 +13,7 @@ import { UserModel } from '../modules/user/user.entity.js';
 import DatabaseService from '../common/database-client/database.service.js';
 import { Offer } from '../types/offer.type.js';
 import {getURI} from '../utils/db.js';
+import { CommentModel } from '../modules/comment/comment.entity.js';
 
 const DEFAULT_DB_PORT = 27017;
 const DEFAULT_USER_PASSWORD = '123456';
@@ -31,7 +32,7 @@ export default class ImportCommand implements CliCommandInterface {
     this.onComplete = this.onComplete.bind(this);
 
     this.logger = new ConsoleLoggerService();
-    this.offerService = new OfferService(this.logger, OfferModel);
+    this.offerService = new OfferService(this.logger, OfferModel, CommentModel);
     this.userService = new UserService(this.logger, UserModel);
     this.databaseService = new DatabaseService(this.logger);
   }
