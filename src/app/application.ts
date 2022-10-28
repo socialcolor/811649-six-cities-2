@@ -12,7 +12,6 @@ import { ControllerInterface } from '../common/controller/controller.interface.j
 @injectable()
 export default class Application {
   private expressApp: Express;
-  commentController: any;
 
   constructor(
     @inject(Component.LoggerInterface) private logger: LoggerInterface,
@@ -21,6 +20,7 @@ export default class Application {
     @inject(Component.ExceptionFilterInterface) private exceptionFilter: ExceptionFilterInterface,
     @inject(Component.UserController) private userController: ControllerInterface,
     @inject(Component.OfferController) private offerController: ControllerInterface,
+    @inject(Component.CommentController) private commentController: ControllerInterface,
   ) {
     this.expressApp = express();
   }
@@ -33,6 +33,10 @@ export default class Application {
 
   public initMiddleware() {
     this.expressApp.use(express.json());
+    this.expressApp.use(
+      '/upload',
+      express.static(this.config.get('UPLOAD_DIRECTORY'))
+    );
   }
 
   public initExceptionFilters() {

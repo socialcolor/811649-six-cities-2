@@ -1,8 +1,8 @@
-import {HousingOfType} from '../../../types/housing-of-type.enum';
+import {HousingOfType} from '../../../types/housing-of-type.enum.js';
 import {User} from '../../../types/user.type.js';
 import {Location} from '../../../types/location.type.js';
 import {IsArray, IsDateString, IsEnum, IsInt, IsMongoId, Max, MaxLength, Min, MinLength, IsBoolean} from 'class-validator';
-import { CityType } from '../../../types/city.enum';
+import { CityType } from '../../../types/city.enum.js';
 
 export default class UpdateOfferDto {
   @IsMongoId({message: 'id field must be valid an id'})

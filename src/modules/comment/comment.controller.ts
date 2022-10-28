@@ -22,8 +22,8 @@ export default class CommentController extends Controller {
   ) {
     super(logger);
     this.logger.info('Register routes for CommentController...');
-    this.addRoute({path: ':offerId', method: HttpMethod.Get, handler: this.index, middlewares: [new ValidateObjectIdMiddleware('offerId'), new DocumentExistsMiddleware(this.offerService, 'Offer', 'offerId')]});
-    this.addRoute({path: ':offerId', method: HttpMethod.Post, handler: this.create, middlewares: [new ValidateObjectIdMiddleware('offerId'), new ValidateDtoMiddleware(CreateCommentDto), new DocumentExistsMiddleware(this.offerService, 'Offer', 'offerId')]});
+    this.addRoute({path: '/:offerId', method: HttpMethod.Get, handler: this.index, middlewares: [new ValidateObjectIdMiddleware('offerId'), new DocumentExistsMiddleware(this.offerService, 'Offer', 'offerId')]});
+    this.addRoute({path: '/', method: HttpMethod.Post, handler: this.create, middlewares: [new ValidateDtoMiddleware(CreateCommentDto)]});
   }
 
   public async index(req: Request, res: Response): Promise<void> {
@@ -34,6 +34,8 @@ export default class CommentController extends Controller {
 
   public async create({body}: Request<Record<string, unknown>, Record<string, unknown>>, res: Response): Promise<void> {
     const comment = await this.commentService.create(body);
+    const rate = await this.commentService.countRateByOfferId(body.offerId);
+    this.offerService.updateById(body.offerId, {rating: rate});
     const commentResponse = fillDTO(CommentResponse, comment);
     this.ok(res, commentResponse);
   }
