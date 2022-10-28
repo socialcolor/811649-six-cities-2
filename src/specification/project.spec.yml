@@ -318,12 +318,6 @@ paths:
                 type: array
                 items:
                   $ref: '#components/schemas/offer'
-        '400':
-          description: Город не найден
-          content:
-            application/json:
-              schema:
-                $ref: '#components/schemas/error'
 
   /offers/favorite/:
     get:
@@ -436,7 +430,7 @@ paths:
             application/json:
               schema:
                 type: array
-                $ref: '#/components/schemas/comment'
+                $ref: '#/components/schemas/createComment'
         '400':
            description: Ошибка в данных комментария
            content:

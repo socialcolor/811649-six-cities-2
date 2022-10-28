@@ -12,6 +12,7 @@ import { ControllerInterface } from '../common/controller/controller.interface.j
 @injectable()
 export default class Application {
   private expressApp: Express;
+  commentController: any;
 
   constructor(
     @inject(Component.LoggerInterface) private logger: LoggerInterface,
@@ -27,6 +28,7 @@ export default class Application {
   public initRoutes() {
     this.expressApp.use('/users', this.userController.router);
     this.expressApp.use('/offers', this.offerController.router);
+    this.expressApp.use('/comments', this.commentController.router);
   }
 
   public initMiddleware() {
