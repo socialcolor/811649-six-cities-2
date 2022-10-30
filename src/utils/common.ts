@@ -8,7 +8,7 @@ export const createOffer = (row: string) => {
   return {
     title,
     description,
-    date,
+    date: new Date(date),
     city,
     previewImage,
     images: images.split(';'),

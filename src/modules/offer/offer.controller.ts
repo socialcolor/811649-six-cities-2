@@ -9,8 +9,11 @@ import { fillDTO } from '../../utils/common.js';
 import { OfferServiceInterface } from './offer-service.interface.js';
 import OfferResponse from './response/offer.response.js';
 import FullOfferResponse from './response/fullOffer.response.js';
-import HttpError from '../../common/errors/http-error.js';
 import CreateOfferDto from './dto/create-offer.dto.js';
+import { ValidateObjectIdMiddleware } from '../../common/middlewares/validate-objectid.middleware.js';
+import { ValidateDtoMiddleware } from '../../common/middlewares/validate-dto.middleware.js';
+import UpdateOfferDto from './dto/update-offer.dto.js';
+import { DocumentExistsMiddleware } from '../../common/middlewares/document-exists.middleware.js';
 
 @injectable()
 export default class OfferController extends Controller {
@@ -22,12 +25,12 @@ export default class OfferController extends Controller {
 
     this.logger.info('Register routes for OfferController...');
     this.addRoute({ path: '/', method: HttpMethod.Get, handler: this.index });
-    this.addRoute({ path: '/', method: HttpMethod.Post, handler: this.create });
+    this.addRoute({ path: '/', method: HttpMethod.Post, handler: this.create, middlewares: [new ValidateDtoMiddleware(CreateOfferDto)] });
     this.addRoute({ path: '/favorite', method: HttpMethod.Get, handler: this.findFavorite });
-    this.addRoute({ path: '/favorite/:id/:status', method: HttpMethod.Get, handler: this.updateFavorite });
-    this.addRoute({ path: '/:id', method: HttpMethod.Get, handler: this.findById });
-    this.addRoute({ path: '/:id', method: HttpMethod.Delete, handler: this.delete });
-    this.addRoute({ path: '/:id', method: HttpMethod.Patch, handler: this.update });
+    this.addRoute({ path: '/favorite/:id/:status', method: HttpMethod.Get, handler: this.updateFavorite, middlewares: [new ValidateObjectIdMiddleware('id'), new DocumentExistsMiddleware(this.offerService, 'Offer', 'id')] });
+    this.addRoute({ path: '/:id', method: HttpMethod.Get, handler: this.findById, middlewares: [new ValidateObjectIdMiddleware('id'), new DocumentExistsMiddleware(this.offerService, 'Offer', 'id')] });
+    this.addRoute({ path: '/:id', method: HttpMethod.Delete, handler: this.delete, middlewares: [new ValidateObjectIdMiddleware('id'), new DocumentExistsMiddleware(this.offerService, 'Offer', 'id')] });
+    this.addRoute({ path: '/:id', method: HttpMethod.Patch, handler: this.update, middlewares: [new ValidateObjectIdMiddleware('id'), new ValidateDtoMiddleware(UpdateOfferDto), new DocumentExistsMiddleware(this.offerService, 'Offer', 'id')] });
     this.addRoute({ path: '/premium/:city', method: HttpMethod.Get, handler: this.findPremium });
   }
 
@@ -37,71 +40,44 @@ export default class OfferController extends Controller {
     this.send(res, StatusCodes.OK, offersResponse);
   }
 
-  public async findById(_req: Request, res: Response): Promise<void> {
-    const offer = await this.offerService.findById(_req.params.id);
+  public async findById(req: Request, res: Response): Promise<void> {
+    const offer = await this.offerService.findById(req.params.id);
     const offersResponse = fillDTO(FullOfferResponse, offer);
-
-    if (!offer) {
-      throw new HttpError(StatusCodes.NOT_FOUND, `Offer ${_req.params.id} not found`);
-    }
-
     this.send(res, StatusCodes.OK, offersResponse);
   }
 
-  public async create({body}: Request<Record<string, unknown>, Record<string, unknown>, CreateOfferDto>, res: Response): Promise<void> {
-    try {
-      const offer = await this.offerService.create(body);
-      const offersResponse = fillDTO(FullOfferResponse, offer);
-      this.send(res, StatusCodes.CREATED, offersResponse);
-    } catch (error) {
-      throw new HttpError(StatusCodes.BAD_REQUEST, 'Bad data in offer');
-    }
+  public async create({ body }: Request<Record<string, unknown>, Record<string, unknown>, CreateOfferDto>, res: Response): Promise<void> {
+    const offer = await this.offerService.create(body);
+    const offersResponse = fillDTO(FullOfferResponse, offer);
+    this.send(res, StatusCodes.CREATED, offersResponse);
   }
 
-  public async delete(_req: Request, res: Response): Promise<void> {
-    const offer = await this.offerService.deleteById(_req.params.id);
-    if(!offer) {
-      throw new HttpError(StatusCodes.BAD_REQUEST, 'Not found id');
-    }
+  public async delete(req: Request, res: Response): Promise<void> {
+    await this.offerService.deleteById(req.params.id);
     this.ok(res, StatusCodes.OK);
   }
 
-  public async update(_req: Request, res: Response): Promise<void> {
-    try {
-      const offer = await this.offerService.updateById(_req.params.id, _req.body);
-      const offersResponse = fillDTO(FullOfferResponse, offer);
-      this.send(res, StatusCodes.CREATED, offersResponse);
-    } catch (error) {
-      throw new HttpError(StatusCodes.NOT_FOUND, 'Not Found Id');
-    }
+  public async update(req: Request, res: Response): Promise<void> {
+    const offer = await this.offerService.updateById(req.params.id, req.body);
+    const offersResponse = fillDTO(FullOfferResponse, offer);
+    this.send(res, StatusCodes.CREATED, offersResponse);
   }
 
-  public async findPremium(_req: Request, res: Response): Promise<void> {
-    const offers = await this.offerService.findPremium(_req.params.city);
+  public async findPremium(req: Request, res: Response): Promise<void> {
+    const offers = await this.offerService.findPremium(req.params.city);
     const offersResponse = fillDTO(OfferResponse, offers);
-
-    if(!offers.length) {
-      throw new HttpError(StatusCodes.BAD_REQUEST, 'Not Found premium offers or city');
-    }
-
     this.send(res, StatusCodes.OK, offersResponse);
   }
 
   public async findFavorite(_req: Request, res: Response): Promise<void> {
     const offers = await this.offerService.findFavorite();
     const offersResponse = fillDTO(OfferResponse, offers);
-
     this.send(res, StatusCodes.OK, offersResponse);
   }
 
-  public async updateFavorite(_req: Request, res: Response): Promise<void> {
-    try {
-      const offers = await this.offerService.updateFavorite(_req.params.id, !!Number(_req.params.status));
-      const offersResponse = fillDTO(OfferResponse, offers);
-      this.send(res, StatusCodes.OK, offersResponse);
-    } catch(error) {
-      throw new HttpError(StatusCodes.NOT_FOUND, 'Not Found Id');
-    }
-
+  public async updateFavorite(req: Request, res: Response): Promise<void> {
+    const offers = await this.offerService.updateFavorite(req.params.id, !!Number(req.params.status));
+    const offersResponse = fillDTO(OfferResponse, offers);
+    this.send(res, StatusCodes.OK, offersResponse);
   }
 }

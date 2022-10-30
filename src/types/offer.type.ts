@@ -5,7 +5,7 @@ import { HousingOfType } from './housing-of-type.enum';
 export type Offer = {
   title: string;
   description: string;
-  date: string;
+  date: Date;
   city: string;
   previewImage: string;
   images: string[];

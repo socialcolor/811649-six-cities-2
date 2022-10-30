@@ -80,4 +80,9 @@ export default class OfferService implements OfferServiceInterface {
       .findByIdAndUpdate(offerId, {'$inc': {comments: 1}})
       .exec();
   }
+
+  public async exists(documentId: string): Promise<boolean> {
+    return (await this.offerModel
+      .exists({_id: documentId})) !== null;
+  }
 }
