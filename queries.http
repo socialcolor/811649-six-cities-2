@@ -110,6 +110,7 @@ Content-Type: image/webp
 ## Получения комментариев
 GET http://localhost:4000/comments/635b8c2fff839476d2b0d260 HTTP/1.1
 
+
 ###
 ## Создания комментариев
 POST http://localhost:4000/comments HTTP/1.1
