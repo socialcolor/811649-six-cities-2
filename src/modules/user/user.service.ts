@@ -28,8 +28,9 @@ export default class UserService implements UserServiceInterface {
     return this.userModel.findOne({email});
   }
 
-  public async findFavorites(email: string): Promise<DocumentType<UserEntity> | null> {
-    return this.userModel.findOne({email}).select({favorites: 1, _id: 0});
+  public async findFavorites(id: string): Promise<string[] | null> {
+    const favoriteOffersId = (await this.userModel.findById(id))?.favorites || null;
+    return favoriteOffersId;
   }
 
   public async updateFavorite(email: string, offerId: string, status: boolean): Promise<DocumentType<UserEntity> | null> {
