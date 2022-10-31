@@ -5,7 +5,7 @@ import { Controller } from '../../common/controller/controller.js';
 import { LoggerInterface } from '../../common/logger/logger.interface.js';
 import { Component } from '../../types/component.types.js';
 import { HttpMethod } from '../../types/http-method.enum.js';
-import { fillDTO } from '../../utils/common.js';
+import { changeFlagFavorite, fillDTO } from '../../utils/common.js';
 import { OfferServiceInterface } from './offer-service.interface.js';
 import { UserServiceInterface } from '../user/user-service.interface.js';
 import OfferResponse from './response/offer.response.js';
@@ -59,9 +59,7 @@ export default class OfferController extends Controller {
     if(req.user) {
       offer = await this.offerService.findById(req.params.id);
       const favorites = await this.userService.findFavorites(req.user.id);
-      if(offer && favorites) {
-        offer.isFavorite = favorites.includes(offer.id);
-      }
+      changeFlagFavorite(offer, favorites);
     } else {
       offer = await this.offerService.findById(req.params.id);
     }
@@ -89,12 +87,28 @@ export default class OfferController extends Controller {
 
   public async findPremium(req: Request, res: Response): Promise<void> {
     const offers = await this.offerService.findPremium(req.params.city);
+    if(req.user) {
+      const favorites = await this.userService.findFavorites(req.user.id);
+      offers.map((offer) => {
+        if(favorites) {
+          offer.isFavorite = favorites.includes(offer.id);
+        }
+      });
+    }
     const offersResponse = fillDTO(OfferResponse, offers);
     this.send(res, StatusCodes.OK, offersResponse);
   }
 
   public async findFavorite(req: Request, res: Response): Promise<void> {
-    const offers = await this.userService.findFavorites(req.user.email);
+    const favorites = await this.userService.findFavorites(req.user.id);
+    const offers = await this.offerService.findFavorite(favorites);
+
+    if(offers) {
+      offers.map((offer) => {
+        offer.isFavorite = true;
+      });
+    }
+
     const offersResponse = fillDTO(OfferResponse, offers);
     this.send(res, StatusCodes.OK, offersResponse);
   }

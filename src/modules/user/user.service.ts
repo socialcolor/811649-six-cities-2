@@ -34,7 +34,6 @@ export default class UserService implements UserServiceInterface {
   }
 
   public async updateFavorite(email: string, offerId: string, status: boolean): Promise<DocumentType<UserEntity> | null> {
-    console.log(email, offerId, status);
     if(status) {
       return this.userModel.findOneAndUpdate(
         {email},

@@ -21,7 +21,7 @@ export default class OfferService implements OfferServiceInterface {
   public async find(count: number = DEFAULT_OFFER_COUNT): Promise<DocumentType<OfferEntity>[]> {
     return await this.offerModel
       .find()
-      .sort({createdAt: SortType.Down})
+      .sort({ createdAt: SortType.Down })
       .limit(count)
       .exec();
   }
@@ -61,7 +61,7 @@ export default class OfferService implements OfferServiceInterface {
       .limit(PREMIUM_OFFER_COUNT);
   }
 
-  public async findFavorite(id: string[]): Promise<DocumentType<OfferEntity>[]> {
+  public async findFavorite(id: string[] | null): Promise<DocumentType<OfferEntity>[]> {
     return this.offerModel
       .find({ _id: { $in: id } })
       .sort({ createdAt: SortType.Down });
