@@ -7,6 +7,7 @@ import { Component } from '../../types/component.types.js';
 import { HttpMethod } from '../../types/http-method.enum.js';
 import { fillDTO } from '../../utils/common.js';
 import { OfferServiceInterface } from './offer-service.interface.js';
+import { UserServiceInterface } from '../user/user-service.interface.js';
 import OfferResponse from './response/offer.response.js';
 import FullOfferResponse from './response/fullOffer.response.js';
 import CreateOfferDto from './dto/create-offer.dto.js';
@@ -21,6 +22,7 @@ export default class OfferController extends Controller {
   constructor(
     @inject(Component.LoggerInterface) logger: LoggerInterface,
     @inject(Component.OfferServiceInterface) private readonly offerService: OfferServiceInterface,
+    @inject(Component.UserServiceInterface) private readonly userService: UserServiceInterface,
   ) {
     super(logger);
 
@@ -35,8 +37,23 @@ export default class OfferController extends Controller {
     this.addRoute({ path: '/premium/:city', method: HttpMethod.Get, handler: this.findPremium });
   }
 
-  public async index(_req: Request, res: Response): Promise<void> {
-    const offers = await this.offerService.find();
+  public async index(req: Request, res: Response): Promise<void> {
+    let offers = null;
+    if(req.user.id) {
+      offers = await this.offerService.find();
+      const favorites = await this.userService.findFavorites(req.user.email);
+
+      offers.forEach((offer) => {
+        favorites?.favorites.forEach((favorite) => {
+          if(offer.id.toString() === favorite.toString()) {
+            offer.isFavorite = true;
+          }
+        });
+      });
+    } else {
+      offers = await this.offerService.find();
+    }
+    offers = await this.offerService.find();
     const offersResponse = fillDTO(OfferResponse, offers);
     this.send(res, StatusCodes.OK, offersResponse);
   }
@@ -71,15 +88,18 @@ export default class OfferController extends Controller {
     this.send(res, StatusCodes.OK, offersResponse);
   }
 
-  public async findFavorite(_req: Request, res: Response): Promise<void> {
-    const offers = await this.offerService.findFavorite();
-    const offersResponse = fillDTO(OfferResponse, offers);
-    this.send(res, StatusCodes.OK, offersResponse);
+  public async findFavorite(req: Request, res: Response): Promise<void> {
+    const id = await this.userService.findFavorites(req.user.email);
+    if(id) {
+      const offers = await this.offerService.findFavorite(id?.favorites);
+      const offersResponse = fillDTO(OfferResponse, offers);
+      this.send(res, StatusCodes.OK, offersResponse);
+    }
   }
 
   public async updateFavorite(req: Request, res: Response): Promise<void> {
-    const offers = await this.offerService.updateFavorite(req.params.id, !!Number(req.params.status));
-    const offersResponse = fillDTO(OfferResponse, offers);
-    this.send(res, StatusCodes.OK, offersResponse);
+    await this.userService.updateFavorite(req.user.email, req.params.id, !!Number(req.params.status));
+    this.ok(res, StatusCodes.OK);
   }
+
 }

@@ -28,6 +28,27 @@ export default class UserService implements UserServiceInterface {
     return this.userModel.findOne({email});
   }
 
+  public async findFavorites(email: string): Promise<DocumentType<UserEntity> | null> {
+    return this.userModel.findOne({email}).select({favorites: 1, _id: 0});
+  }
+
+  public async updateFavorite(email: string, offerId: string, status: boolean): Promise<DocumentType<UserEntity> | null> {
+    console.log(email, offerId, status);
+    if(status) {
+      return this.userModel.findOneAndUpdate(
+        {email},
+        {$push: {favorites: offerId}},
+        {returnDocument: 'after'}
+      );
+    } else {
+      return this.userModel.findOneAndUpdate(
+        {email},
+        {$pull: {favorites: offerId}},
+        {returnDocument: 'after'}
+      );
+    }
+  }
+
   public async findOrCreate(dto: CreateUserDto, salt: string): Promise<DocumentType<UserEntity>> {
     const existedUser = await this.findByEmail(dto.email);
 

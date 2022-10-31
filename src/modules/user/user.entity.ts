@@ -9,6 +9,9 @@ export interface UserEntity extends defaultClasses.Base {}
 @modelOptions({
   schemaOptions: {
     collection: 'users'
+  },
+  options: {
+    allowMixed: 0,
   }
 })
 export class UserEntity extends defaultClasses.TimeStamps implements User {
@@ -19,6 +22,7 @@ export class UserEntity extends defaultClasses.TimeStamps implements User {
     this.email = data.email;
     this.avatarUrl = data.avatarUrl;
     this.isPro = data.isPro;
+    this.favorites = [];
   }
 
   @prop({required: true, default: ''})
@@ -32,6 +36,9 @@ export class UserEntity extends defaultClasses.TimeStamps implements User {
 
   @prop({required: true, default: 'false'})
   public isPro!: boolean;
+
+  @prop({required: true})
+  public favorites: string[];
 
   @prop({required: true, default: ''})
   public password!: string;

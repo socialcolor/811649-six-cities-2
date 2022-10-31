@@ -13,7 +13,7 @@ import {DatabaseInterface} from './common/database-client/database.interface.js'
 import UserService from './modules/user/user.service.js';
 import {UserServiceInterface} from './modules/user/user-service.interface.js';
 import {UserEntity, UserModel} from './modules/user/user.entity.js';
-import OfferService from './modules/offer/offer.service.js';
+import  OfferService from './modules/offer/offer.service.js';
 import {OfferServiceInterface} from './modules/offer/offer-service.interface.js';
 import {OfferEntity, OfferModel} from './modules/offer/offer.entity.js';
 import { CommentEntity, CommentModel } from './modules/comment/comment.entity.js';
