@@ -9,7 +9,7 @@ Content-Type: application/json
 
 {
   "name": "Jonh",
-  "email": "torans@overlook.net",
+  "email": "test@overlook.net",
   "avatarUrl": "torrance.png",
   "password": "shining",
   "isPro": true
@@ -21,19 +21,27 @@ POST http://localhost:4000/users/login HTTP/1.1
 Content-Type: application/json
 
 {
-  "email": "torans@overlook.net"
+  "email": "test@overlook.net",
+  "password": "shining"
 }
+
+###
+## Проверка токена пользователя
+GET http://localhost:4000/users/login HTTP/1.1
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJuYW1lIjoiSm9uaCIsImVtYWlsIjoidGVzdEBvdmVybG9vay5uZXQiLCJpZCI6IjYzNWYyZGJkMWJlNjVjOGMxNjU1YjA4OCIsImlzUHJvIjp0cnVlLCJhdmF0YXJVcmwiOiJ0b3JyYW5jZS5wbmciLCJpYXQiOjE2NjcxODIyMzYsImV4cCI6MTY2NzM1NTAzNn0.YgbTnI671D-sdkrMN1oggLM3iODxWZszuEIH-rpuDZQ
 
 ###
 #Объявления
 ## Получение объявлений
 GET http://localhost:4000/offers/ HTTP/1.1
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJuYW1lIjoiSm9uaCIsImVtYWlsIjoidGVzdEBvdmVybG9vay5uZXQiLCJpZCI6IjYzNWYyZGJkMWJlNjVjOGMxNjU1YjA4OCIsImlzUHJvIjp0cnVlLCJhdmF0YXJVcmwiOiJ0b3JyYW5jZS5wbmciLCJpYXQiOjE2NjcxODIyMzYsImV4cCI6MTY2NzM1NTAzNn0.YgbTnI671D-sdkrMN1oggLM3iODxWZszuEIH-rpuDZQ
 Content-Type: application/json
 
 
 ###
 ## Поиск по Id
-GET http://localhost:4000/offers/635b8c2fff839476d2b0d260 HTTP/1.1
+GET http://localhost:4000/offers/635b8c2fff839476d2b0d263 HTTP/1.1
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJuYW1lIjoiSm9uaCIsImVtYWlsIjoidGVzdEBvdmVybG9vay5uZXQiLCJpZCI6IjYzNWYyZGJkMWJlNjVjOGMxNjU1YjA4OCIsImlzUHJvIjp0cnVlLCJhdmF0YXJVcmwiOiJ0b3JyYW5jZS5wbmciLCJpYXQiOjE2NjcyMjIzOTcsImV4cCI6MTY2NzM5NTE5N30.w7zX4LbonAPPgcGjyDhQ86_ouphz86mTUWCZqgMjsxw
 Content-Type: application/json
 
 ###
@@ -85,14 +93,17 @@ Content-Type: application/json
 ###
 ## Получение Premium Объявлений
 GET  http://localhost:4000/offers/premium/Paris HTTP/1.1
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJuYW1lIjoiSm9uaCIsImVtYWlsIjoidGVzdEBvdmVybG9vay5uZXQiLCJpZCI6IjYzNWYyZGJkMWJlNjVjOGMxNjU1YjA4OCIsImlzUHJvIjp0cnVlLCJhdmF0YXJVcmwiOiJ0b3JyYW5jZS5wbmciLCJpYXQiOjE2NjcyMjIzOTcsImV4cCI6MTY2NzM5NTE5N30.w7zX4LbonAPPgcGjyDhQ86_ouphz86mTUWCZqgMjsxw
 
 ###
 ## Получение Favorite
 GET http://localhost:4000/offers/favorite HTTP/1.1
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJuYW1lIjoiSm9uaCIsImVtYWlsIjoidGVzdEBvdmVybG9vay5uZXQiLCJpZCI6IjYzNWYyZGJkMWJlNjVjOGMxNjU1YjA4OCIsImlzUHJvIjp0cnVlLCJhdmF0YXJVcmwiOiJ0b3JyYW5jZS5wbmciLCJpYXQiOjE2NjcyMjIzOTcsImV4cCI6MTY2NzM5NTE5N30.w7zX4LbonAPPgcGjyDhQ86_ouphz86mTUWCZqgMjsxw
 
 ###
 ## Измнения Favorite
-GET http://localhost:4000/offers/favorite/635b8c2fff839476d2b0d260/0 HTTP/1.1
+GET http://localhost:4000/offers/favorite/635b8c2fff839476d2b0d263/1 HTTP/1.1
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJuYW1lIjoiSm9uaCIsImVtYWlsIjoidGVzdEBvdmVybG9vay5uZXQiLCJpZCI6IjYzNWYyZGJkMWJlNjVjOGMxNjU1YjA4OCIsImlzUHJvIjp0cnVlLCJhdmF0YXJVcmwiOiJ0b3JyYW5jZS5wbmciLCJpYXQiOjE2NjcxODIyMzYsImV4cCI6MTY2NzM1NTAzNn0.YgbTnI671D-sdkrMN1oggLM3iODxWZszuEIH-rpuDZQ
 
 ###
 ## Отправка аватарки пользователю
@@ -109,7 +120,6 @@ Content-Type: image/webp
 ###
 ## Получения комментариев
 GET http://localhost:4000/comments/635b8c2fff839476d2b0d260 HTTP/1.1
-
 
 ###
 ## Создания комментариев

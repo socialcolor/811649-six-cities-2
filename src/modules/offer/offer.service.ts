@@ -16,13 +16,12 @@ export default class OfferService implements OfferServiceInterface {
     @inject(Component.LoggerInterface) private readonly logger: LoggerInterface,
     @inject(Component.OfferModel) private readonly offerModel: types.ModelType<OfferEntity>,
     @inject(Component.CommentModel) private readonly commentModel: types.ModelType<CommentEntity>,
-  ) {}
+  ) { }
 
   public async find(count: number = DEFAULT_OFFER_COUNT): Promise<DocumentType<OfferEntity>[]> {
-    this.logger.info('Get offer');
     return await this.offerModel
       .find()
-      .sort({createdAt: SortType.Down})
+      .sort({ createdAt: SortType.Down })
       .limit(count)
       .exec();
   }
@@ -42,7 +41,7 @@ export default class OfferService implements OfferServiceInterface {
   }
 
   public async deleteById(offerId: string): Promise<DocumentType<OfferEntity> | null> {
-    await this.commentModel.deleteMany({offerId: offerId}).exec();
+    await this.commentModel.deleteMany({ offerId: offerId }).exec();
     return this.offerModel
       .findByIdAndDelete(offerId)
       .exec();
@@ -50,39 +49,39 @@ export default class OfferService implements OfferServiceInterface {
 
   public async updateById(offerId: string, dto: UpdateOfferDto): Promise<DocumentType<OfferEntity> | null> {
     return this.offerModel
-      .findByIdAndUpdate(offerId, dto, {new: true})
+      .findByIdAndUpdate(offerId, dto, { new: true })
       .populate('host')
       .exec();
   }
 
   public async findPremium(city: string): Promise<DocumentType<OfferEntity>[]> {
     return this.offerModel
-      .find({city: city, isPremium: true})
-      .sort({createdAt: SortType.Down})
+      .find({ city: city, isPremium: true })
+      .sort({ createdAt: SortType.Down })
       .limit(PREMIUM_OFFER_COUNT);
   }
 
-  public async findFavorite(): Promise<DocumentType<OfferEntity>[]> {
+  public async findFavorite(id: string[] | null): Promise<DocumentType<OfferEntity>[]> {
     return this.offerModel
-      .find({isFavorite: true})
-      .sort({createdAt: SortType.Down});
+      .find({ _id: { $in: id } })
+      .sort({ createdAt: SortType.Down });
   }
 
   public async updateFavorite(offerId: string, status: boolean): Promise<DocumentType<OfferEntity> | null> {
     return this.offerModel
-      .findByIdAndUpdate(offerId, {isFavorite: status}, {new: true})
-      .select({id: 1, title: 1, type: 1, date: 1, city: 1, previewImage: 1, isPremium: 1, isFavorite: 1, rating: 1, price: 1, comments: 1})
+      .findByIdAndUpdate(offerId, { isFavorite: status }, { new: true })
+      .select({ id: 1, title: 1, type: 1, date: 1, city: 1, previewImage: 1, isPremium: 1, isFavorite: 1, rating: 1, price: 1, comments: 1 })
       .exec();
   }
 
   public async incCommentCount(offerId: string): Promise<DocumentType<OfferEntity> | null> {
     return this.offerModel
-      .findByIdAndUpdate(offerId, {'$inc': {comments: 1}})
+      .findByIdAndUpdate(offerId, { '$inc': { comments: 1 } })
       .exec();
   }
 
   public async exists(documentId: string): Promise<boolean> {
     return (await this.offerModel
-      .exists({_id: documentId})) !== null;
+      .exists({ _id: documentId })) !== null;
   }
 }

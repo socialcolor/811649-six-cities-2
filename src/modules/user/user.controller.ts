@@ -9,11 +9,13 @@ import { Component } from '../../types/component.types.js';
 import { HttpMethod } from '../../types/http-method.enum.js';
 import CreateUserDto from './dto/create-user.dto.js';
 import { UserServiceInterface } from './user-service.interface.js';
-import {fillDTO} from '../../utils/common.js';
+import {createJWT, fillDTO} from '../../utils/common.js';
 import UserResponse from './response/user.response.js';
 import LoginUserDto from './dto/login-user.dto.js';
 import { ValidateObjectIdMiddleware } from '../../common/middlewares/validate-objectid.middleware.js';
 import { UploadFileMiddleware } from '../../common/middlewares/upload-file.middleware.js';
+import { JWT_ALGORITM } from './user.constant.js';
+import LoggedUserResponse from './response/logged-user.response.js';
 
 @injectable()
 export default class UserController extends Controller {
@@ -27,6 +29,7 @@ export default class UserController extends Controller {
     this.logger.info('Register routes for UserController...');
     this.addRoute({ path: '/', method: HttpMethod.Post, handler: this.create });
     this.addRoute({ path: '/login', method: HttpMethod.Post, handler: this.login });
+    this.addRoute({ path: '/login', method: HttpMethod.Get, handler: this.checkAuthenticate});
     this.addRoute({ path: '/:userId/avatar', method: HttpMethod.Post, handler: this.uploadAvatar, middlewares: [new ValidateObjectIdMiddleware('userId'),  new UploadFileMiddleware(this.configService.get('UPLOAD_DIRECTORY'), 'avatar')]});
   }
 
@@ -52,25 +55,30 @@ export default class UserController extends Controller {
     );
   }
 
-  public async login(
-    {body}: Request<Record<string, unknown>, Record<string, unknown>, LoginUserDto>,
-    _res: Response,
-  ): Promise<void> {
-    const existsUser = await this.userService.findByEmail(body.email);
+  public async login({body}: Request<Record<string, unknown>, Record<string, unknown>, LoginUserDto>, res: Response,): Promise<void> {
+    const user = await this.userService.verifyUser(body, this.configService.get('SALT'));
 
-    if (!existsUser) {
+    if (!user) {
       throw new HttpError(
         StatusCodes.UNAUTHORIZED,
-        `User with email ${body.email} not found.`,
-        'UserController',
+        'Unauthorized',
+        'UserController'
       );
     }
 
-    throw new HttpError(
-      StatusCodes.NOT_IMPLEMENTED,
-      'Not implemented',
-      'UserController',
+    const token = await createJWT(
+      JWT_ALGORITM,
+      this.configService.get('JWT_SECRET'),
+      { name: user.name, email: user.email, id: user.id, isPro: user.isPro, avatarUrl: user.avatarUrl }
     );
+
+    this.ok(res, fillDTO(LoggedUserResponse,  { name: user.name, email: user.email, id: user.id, isPro: user.isPro, avatarUrl: user.avatarUrl, token: token }));
+  }
+
+  public async checkAuthenticate(req: Request, res: Response) {
+    const user = await this.userService.findByEmail(req.user.email);
+
+    this.ok(res, fillDTO(LoggedUserResponse, user));
   }
 
   public async uploadAvatar(req: Request, res: Response) {

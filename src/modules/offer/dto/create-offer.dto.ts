@@ -1,7 +1,7 @@
 import {HousingOfType} from '../../../types/housing-of-type.enum.js';
 import {User} from '../../../types/user.type.js';
 import {Location} from '../../../types/location.type.js';
-import {IsArray, IsDateString, IsEnum, IsInt, IsMongoId, Max, MaxLength, Min, MinLength, IsBoolean} from 'class-validator';
+import {IsArray, IsDateString, IsEnum, IsInt, Max, MaxLength, Min, MinLength, IsBoolean} from 'class-validator';
 import { CityType } from '../../../types/city.enum.js';
 
 export default class CreateOfferDto {
@@ -57,7 +57,6 @@ export default class CreateOfferDto {
   @IsArray({message: 'Field goods must be an array'})
   public goods!: string[];
 
-  @IsMongoId({message: 'host field must be valid an id'})
   public host!: User;
 
   @IsInt({message: 'comments field must be number'})

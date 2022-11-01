@@ -1,7 +1,9 @@
+import * as jose from 'jose';
+import { ClassConstructor, plainToInstance } from 'class-transformer';
+import { DocumentType } from '@typegoose/typegoose';
 import crypto from 'crypto';
-import { HousingOfType } from '../types/housing-of-type.enum';
-import {ClassConstructor, plainToInstance} from 'class-transformer';
-
+import { HousingOfType } from '../types/housing-of-type.enum.js';
+import { OfferEntity } from '../modules/offer/offer.entity.js';
 export const createOffer = (row: string) => {
   const tokens = row.replace('\n', '').split('\t');
   const [title, description, date, city, previewImage, images, isPremium, isFavorite, rating, type, bedrooms, maxAdults, price, goods, name, email, avatarUrl, isPro, comments, lat, lng] = tokens;
@@ -47,4 +49,18 @@ export const createErrorObject = (message: string) => ({
 });
 
 export const fillDTO = <T, V>(someDto: ClassConstructor<T>, plainObject: V) =>
-  plainToInstance(someDto, plainObject, {excludeExtraneousValues: true});
+  plainToInstance(someDto, plainObject, { excludeExtraneousValues: true });
+
+export const createJWT = async (algoritm: string, jwtSecret: string, payload: object): Promise<string> =>
+  new jose.SignJWT({ ...payload })
+    .setProtectedHeader({ alg: algoritm })
+    .setIssuedAt()
+    .setExpirationTime('2d')
+    .sign(crypto.createSecretKey(jwtSecret, 'utf-8'));
+
+export const changeFlagFavorite = (offer: DocumentType<OfferEntity> | null, favorites: string[] | null): DocumentType<OfferEntity> | null=> {
+  if(offer && favorites) {
+    offer.isFavorite = favorites.includes(offer.id);
+  }
+  return offer;
+};

@@ -10,9 +10,8 @@ export default class CreateCommentDto {
   @Max(5, {message: 'Maximum rate is 5'})
   public rate!: number;
 
-  @IsMongoId()
   public userId!: string;
 
-  @IsMongoId()
+  @IsMongoId({message: 'offerId field must be a valid id'})
   public offerId!: string;
 }

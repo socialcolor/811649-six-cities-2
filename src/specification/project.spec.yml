@@ -106,30 +106,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/error'
 
-  /users/logout:
-    delete:
-      tags:
-        - users
-      summary: Выход пользователя
-      description: Выход пользователя из закрытой части приложения
-      parameters:
-        - in: header
-          name: X-Token
-          description: Токен авторизации
-          schema:
-            type: string
-            example: T2xpdmVyLmNvbm5lckBnbWFpbC5jb20=
-          required: true
-      responses:
-        '200':
-          description: Сеанс завершен
-        '400':
-          description: Ошибка, неверный токен
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/error'
-
   /offers:
     get:
       tags:
@@ -365,11 +341,7 @@ paths:
           required: true
       responses:
         '200':
-          description: Возвращяет измененное объявление
-          content:
-              application/json:
-                schema:
-                  $ref: '#/components/schemas/offer'
+          description: Успешно измененно
         '400':
           description: Объявление не найденно
           content:
